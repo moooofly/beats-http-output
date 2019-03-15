@@ -1,0 +1,37 @@
+#-------------------------- HTTP output ------------------------------
+#output.http:
+# Hosts currently support 'host' or 'host:port' only
+#    hosts: ["host.example.com:443"]
+#
+# Optional further settings:
+#    protocol: "https"
+#    path: "/foo"
+#    parameters: "xyz"
+#    proxy_url: "http://localhost:8080"
+#    loadbalance: true
+#    compression_level: 0
+#    headers: 
+#        Authorization: "XXXXXXXXXXXXXXXXXX"
+#    batch_publish: true
+#    batch_size: 5
+#    max_retries: -1
+#    content_type: "application/custom"
+#    max_retries: 3
+#    timeout: 90 seconds
+#    backoff:
+#        init: 1
+#        max: 60
+#    tls:
+#        enabled: true
+#        verification_mode: "full"
+#        supported_protocols: [...]
+#        cipher_suites: [...]
+#        curve_types: [...]
+#        certificate_authorities: [...]
+#        certificate: ...
+#        key: ...
+#        key_passphrase: ...
+#
+# BASIC authentication:
+#    username: "alice"
+#    password: "secret"
