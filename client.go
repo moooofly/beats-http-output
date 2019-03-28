@@ -62,7 +62,7 @@ type Connection struct {
 	ContentType string
 }
 
-type eventraw map[string]json.RawMessage
+type eventRaw map[string]json.RawMessage
 
 type event struct {
 	Timestamp time.Time     `json:"@timestamp"`
@@ -92,7 +92,7 @@ func NewClient(s ClientSettings) (*Client, error) {
 		proxy = http.ProxyURL(s.Proxy)
 	}
 
-	logp.Info("Http url: %s", s.URL)
+	logp.Info("HTTP URL: %s", s.URL)
 
 	// TODO: add socks5 proxy support
 	var dialer, tlsDialer transport.Dialer
@@ -217,20 +217,21 @@ func (client *Client) publishEvents(
 		return data, ErrNotConnected
 	}
 
-	// logp.Info("complete data set: ", data)
+	//logp.Info("Complete data set: ", data)
 
 	var failedEvents []publisher.Event
 
 	sendErr := error(nil)
 
 	if client.batchPublish {
-		//Publish events in bulk
-		debugf("Publishing events in batch")
+		// Publish events in bulk
+		debugf("Publishing events in batch.")
 		sendErr = client.BatchPublishEvent(data)
 		if sendErr != nil {
 			return nil, sendErr
 		}
 	} else {
+		debugf("Publishing events one by one.")
 		for index, event := range data {
 			sendErr = client.PublishEvent(event)
 			if sendErr != nil {
@@ -242,8 +243,7 @@ func (client *Client) publishEvents(
 	}
 
 	debugf("PublishEvents: %d metrics have been published over HTTP in %v.",
-		len(data),
-		time.Now().Sub(begin))
+		len(data), time.Now().Sub(begin))
 
 	ackedEvents.Add(int64(len(data) - len(failedEvents)))
 	eventsNotAcked.Add(int64(len(failedEvents)))
@@ -260,13 +260,10 @@ func (client *Client) BatchPublishEvent(data []publisher.Event) error {
 		return ErrNotConnected
 	}
 
-	// var events []event
-	var events = make([]eventraw, len(data))
+	var events = make([]eventRaw, len(data))
 
 	// debugf("Publish event: %s", event)
 	for i, event := range data {
-		//make event
-		// events = append(events, makeEvent(&event.Content))
 		events[i] = makeEvent(&event.Content)
 	}
 
@@ -398,7 +395,8 @@ func closing(c io.Closer) {
 
 //this should ideally be in enc.go
 func makeEvent(v *beat.Event) map[string]json.RawMessage {
-	// Inline not supported, HT: https://stackoverflow.com/questions/49901287/embed-mapstringstring-in-go-json-marshaling-without-extra-json-property-inlin
+	// Inline not supported,
+	// HT: https://stackoverflow.com/questions/49901287/embed-mapstringstring-in-go-json-marshaling-without-extra-json-property-inlin
 	type event0 event // prevent recursion
 
 	e := event{Timestamp: v.Timestamp.UTC(), Fields: v.Fields}
@@ -408,8 +406,8 @@ func makeEvent(v *beat.Event) map[string]json.RawMessage {
 		logp.Warn("Error encoding event to JSON: %v", err)
 	}
 
-	var eventmap map[string]json.RawMessage
-	err = json.Unmarshal(b, &eventmap)
+	var eventMap map[string]json.RawMessage
+	err = json.Unmarshal(b, &eventMap)
 	if err != nil {
 		logp.Warn("Error decoding JSON to map: %v", err)
 	}
@@ -420,8 +418,8 @@ func makeEvent(v *beat.Event) map[string]json.RawMessage {
 		if err != nil {
 			logp.Warn("Error encoding map to JSON: %v", err)
 		}
-		eventmap[j] = b
+		eventMap[j] = b
 	}
 
-	return eventmap
+	return eventMap
 }
